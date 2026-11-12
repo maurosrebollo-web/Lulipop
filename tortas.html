@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tortas Personalizadas - Lulipop</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+    <nav class="right-sidebar-nav" id="sidebar-menu"></nav>
+
+    <header class="header-banner">
+        <img id="img-site-logo" src="Lulipop logo.PNG" alt="Lulipop Logo">
+        <p class="header-subtitle">Catálogo de Tortas Personalizadas</p>
+    </header>
+
+    <section class="section container">
+        <h2 class="section-title">Nuestras Tortas</h2>
+        <p class="section-desc">Explora nuestros modelos de referencia o completa el formulario más abajo para solicitar tu torta a medida.</p>
+        <div class="grid-3" id="contenedor-tortas"></div>
+    </section>
+
+    <section class="section container">
+        <div class="booking-box">
+            <h2 class="section-title" style="font-size: 1.8rem;">Solicitar Reserva de Torta</h2>
+            <div class="alert-info">
+                <i class="fa-solid fa-circle-info"></i> <strong>Importante:</strong> Envía tu solicitud con los detalles. Revisaremos disponibilidad y te responderemos por WhatsApp.
+            </div>
+
+            <form id="form-reserva" data-categoria="Torta">
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label>Modelo / Estilo de Torta:</label>
+                        <select id="select-producto" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Peso / Tamaño / Porciones:</label>
+                        <select id="select-peso-torta" required></select>
+                    </div>
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label>Sabor de Bizcochuelo:</label>
+                        <select id="select-bizcochuelo" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Relleno Principal:</label>
+                        <select id="select-relleno" required></select>
+                    </div>
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label>Fecha del Evento / Entrega:</label>
+                        <input type="date" id="reserva-fecha" required>
+                        <small id="texto-anticipacion" style="color: var(--color-primary); font-weight: 600;"></small>
+                    </div>
+                    <div class="form-group">
+                        <label>Modalidad de Entrega:</label>
+                        <select id="reserva-entrega" required>
+                            <option value="Retiro en taller">Retiro en taller</option>
+                            <option value="Envío a domicilio (Costo según zona a coordinar por WhatsApp)">Envío a domicilio (A coordinar por WhatsApp)</option>
+                        </select>
+                        <small id="texto-tarifas-envio" style="color: #666; display:block; margin-top:4px;"></small>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Alergias o Intolerancias Alimentarias:</label>
+                    <div class="checklist-box">
+                        <label><input type="checkbox" class="check-alergia" value="Sin Gluten / Sin TACC"> Sin Gluten / Sin TACC</label>
+                        <label><input type="checkbox" class="check-alergia" value="Sin Lactosa"> Sin Lactosa</label>
+                        <label><input type="checkbox" class="check-alergia" value="Sin Frutos Secos"> Sin Frutos Secos</label>
+                    </div>
+                    <input type="text" id="reserva-alergia-detalle" placeholder="Especifica aquí si eres alérgico o intolerante a algún otro ingrediente...">
+                </div>
+
+                <div class="form-group">
+                    <label>Imagen de Referencia (Opcional - ¿Tienes una foto de lo que buscas?):</label>
+                    <input type="file" id="reserva-foto-ref" accept="image/*">
+                    <small style="color:#666;">Sube una imagen de ejemplo para decirte si podemos realizarlo y en qué sabores.</small>
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label>Tu Nombre Completo:</label>
+                        <input type="text" id="reserva-nombre" placeholder="Ej: Ana García" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Tu WhatsApp de Contacto:</label>
+                        <input type="text" id="reserva-telefono" placeholder="Ej: 099123456" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary btn-block" style="font-size: 1.05rem; padding: 14px;">
+                    <i class="fa-brands fa-whatsapp"></i> Enviar Solicitud de Reserva
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 Lulipop - Pastelería Artesanal | <a href="index.html">Volver al Inicio</a></p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

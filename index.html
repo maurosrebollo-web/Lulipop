@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lulipop - Pastelería Artesanal</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+    <nav class="right-sidebar-nav" id="sidebar-menu"></nav>
+
+    <header class="header-banner">
+        <img id="img-site-logo" src="Lulipop logo.PNG" alt="Lulipop Logo">
+        <p class="header-subtitle">Pastelería Artesanal & Diseños Personalizados</p>
+    </header>
+
+    <section class="section container">
+        <h2 class="section-title">¿Qué te gustaría encargar hoy?</h2>
+        <p class="section-desc">Explora nuestras especialidades y solicita tu presupuesto personalizado.</p>
+        
+        <div class="grid-3">
+            <div class="card" onclick="location.href='tortas.html'" style="cursor:pointer;">
+                <img id="img-cat-tortas" src="Lulipop logo.PNG" alt="Tortas Lulipop">
+                <div class="card-body">
+                    <h3><i class="fa-solid fa-cake-candles" style="color:var(--color-primary);"></i> Tortas</h3>
+                    <p>Tortas temáticas, de cumpleaños y celebraciones hechas a medida en kilos, sabores y diseños.</p>
+                    <a href="tortas.html" class="btn-primary btn-block">Ver Tortas y Reservar</a>
+                </div>
+            </div>
+
+            <div class="card" onclick="location.href='muffins.html'" style="cursor:pointer;">
+                <img id="img-cat-muffins" src="Lulipop logo.PNG" alt="Muffins Lulipop">
+                <div class="card-body">
+                    <h3><i class="fa-solid fa-bread-slice" style="color:var(--color-primary);"></i> Muffins</h3>
+                    <p>Esponjosos muffins decorados en cajas por cantidad, ideales para mesas dulces y regalos.</p>
+                    <a href="muffins.html" class="btn-primary btn-block">Ver Muffins y Reservar</a>
+                </div>
+            </div>
+
+            <div class="card" onclick="location.href='cookies.html'" style="cursor:pointer;">
+                <img id="img-cat-cookies" src="Lulipop logo.PNG" alt="Cookies Lulipop">
+                <div class="card-body">
+                    <h3><i class="fa-solid fa-cookie-bite" style="color:var(--color-primary);"></i> Cookies</h3>
+                    <p>Galletas personalizadas con glaseado o temática especial para souvenirs y eventos.</p>
+                    <a href="cookies.html" class="btn-primary btn-block">Ver Cookies y Reservar</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="sobre-mi" class="section container">
+        <div class="about-box">
+            <img id="about-img" src="Lulipop logo.PNG" alt="Lulipop Historia">
+            <div>
+                <h2 class="section-title" style="text-align:left;" id="about-title">Sobre Lulipop</h2>
+                <p id="about-text" style="color:#555; margin-bottom:15px;">
+                    ¡Hola! Bienvenidos a Lulipop. Detrás de cada torta, muffin y cookie hay dedicación, ingredientes seleccionados y mucho amor por los detalles.
+                </p>
+                <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                    <a href="https://instagram.com/lulipop._" target="_blank" class="btn-primary"><i class="fa-brands fa-instagram"></i> @lulipop._</a>
+                    <a href="https://wa.me/59898101555" target="_blank" class="btn-secondary"><i class="fa-brands fa-whatsapp"></i> 098 101 555</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="galeria" class="section container bg-soft" style="padding: 40px 25px;">
+        <h2 class="section-title">Galería de Trabajos Realizados</h2>
+        <p class="section-desc">Algunos de los pedidos personalizados que ya salieron de nuestro taller.</p>
+        <div class="grid-3" id="contenedor-galeria"></div>
+    </section>
+
+    <section id="blog" class="section container">
+        <h2 class="section-title">Detrás de Escena & Procesos</h2>
+        <p class="section-desc">Mira cómo preparamos, horneamos y decoramos cada pedido artesanal.</p>
+        <div class="grid-3" id="contenedor-blog"></div>
+    </section>
+
+    <section id="testimonios" class="section container bg-soft" style="padding: 40px 25px;">
+        <h2 class="section-title">Lo que dicen nuestros clientes</h2>
+        <div class="grid-3" id="contenedor-testimonios"></div>
+    </section>
+
+    <section id="faq" class="section container">
+        <h2 class="section-title">Preguntas Frecuentes</h2>
+        <p class="section-desc">Resolvemos tus dudas sobre anticipación, entregas, alergias y reservas.</p>
+        <div style="max-width: 800px; margin: 0 auto;" id="contenedor-faq"></div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 Lulipop - Pastelería Artesanal | Instagram: <a href="https://instagram.com/lulipop._" target="_blank">@lulipop._</a> | WhatsApp: <a href="https://wa.me/59898101555" target="_blank">098101555</a></p>
+        <p style="margin-top: 8px; font-size: 0.8rem;"><a href="admin.html" style="color: #aaa;">Acceso Administración</a></p>
+    </footer>
+
+    <a href="https://wa.me/59898101555?text=Hola%20Lulipop!%20Quisiera%20hacer%20una%20consulta." class="whatsapp-float" target="_blank">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
+
+    <script src="script.js"></script>
+</body>
+</html>

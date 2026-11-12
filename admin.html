@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administración - Lulipop</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { padding-right: 0; }
+        .admin-section { background: white; padding: 25px; border-radius: 12px; border: 1px solid var(--color-light); margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .admin-section h3 { color: var(--color-primary); margin-bottom: 15px; border-bottom: 2px solid var(--color-light); padding-bottom: 8px; }
+        .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
+        .tag-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+        .tag-item { background: var(--color-light); padding: 8px 12px; border-radius: 6px; font-size: 0.9rem; display: flex; align-items: center; justify-content: space-between; }
+        .tag-item div { display: flex; align-items: center; gap: 8px; }
+        .tag-item button { background: none; border: none; cursor: pointer; font-size: 1rem; padding: 2px 6px; border-radius: 4px; }
+        .btn-order { background: #fff; border: 1px solid #ccc; color: #333; }
+        .btn-order:hover { background: #eee; }
+        .btn-del { color: #d9534f; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { background: var(--color-primary); color: white; padding: 10px; text-align: left; font-size: 0.9rem; }
+        td { padding: 10px; border-bottom: 1px solid #eee; font-size: 0.9rem; vertical-align: middle; }
+        .thumb { width: 55px; height: 55px; object-fit: cover; border-radius: 6px; }
+        
+        #auth-overlay { position: fixed; inset: 0; background: rgba(58, 50, 52, 0.95); display: flex; justify-content: center; align-items: center; z-index: 2000; }
+        .auth-box { background: white; padding: 35px; border-radius: 16px; max-width: 380px; width: 90%; text-align: center; border: 3px solid var(--color-primary); }
+    </style>
+</head>
+<body>
+
+    <div id="auth-overlay">
+        <div class="auth-box">
+            <img src="Lulipop logo.PNG" style="width:90px; border-radius:50%; margin-bottom:10px;" alt="Logo">
+            <h2 style="color:var(--color-primary); margin-bottom:15px;"><i class="fa-solid fa-lock"></i> Admin Lulipop</h2>
+            <form id="form-login">
+                <div class="form-group">
+                    <input type="password" id="admin-pass-input" placeholder="Contraseña" required>
+                </div>
+                <button type="submit" class="btn-primary btn-block">Ingresar</button>
+            </form>
+            <p style="margin-top:15px;"><a href="index.html" style="color:#666; font-size:0.85rem;">&larr; Volver a la web</a></p>
+        </div>
+    </div>
+
+    <header class="header-banner" style="padding:15px;">
+        <h2 style="color:var(--color-primary);">Panel de Control - Lulipop</h2>
+        <div style="margin-top:8px;">
+            <a href="index.html" class="btn-secondary" style="padding:6px 14px; font-size:0.85rem;"><i class="fa-solid fa-eye"></i> Ver Sitio Web</a>
+        </div>
+    </header>
+
+    <div class="container" style="margin-top:30px;">
+
+        <div class="admin-section">
+            <h3><i class="fa-solid fa-calendar-check"></i> Solicitudes de Reserva Recibidas</h3>
+            <div style="overflow-x:auto;" id="tabla-reservas"></div>
+        </div>
+
+        <div class="admin-section">
+            <h3><i class="fa-solid fa-sliders"></i> Configuración de Agenda, Envíos y "Sobre Mí"</h3>
+            <div class="admin-grid">
+                <div class="form-group">
+                    <label>Días mínimos de anticipación para pedir:</label>
+                    <input type="number" id="cfg-dias" min="1" value="4">
+                </div>
+                <div class="form-group">
+                    <label>Texto informativo de Tarifas de Envío:</label>
+                    <input type="text" id="cfg-envio" placeholder="Ej: Envíos desde $150 según zona">
+                </div>
+                <div class="form-group">
+                    <label>Título sección "Sobre Mí":</label>
+                    <input type="text" id="cfg-about-title">
+                </div>
+                <div class="form-group">
+                    <label>Foto sección "Sobre Mí" (Opcional):</label>
+                    <input type="file" id="cfg-about-img" accept="image/*">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Historia / Texto "Sobre Mí":</label>
+                <textarea id="cfg-about-text" rows="3"></textarea>
+            </div>
+            <button type="button" onclick="guardarConfigGeneral()" class="btn-primary">Guardar Configuración</button>
+        </div>
+
+        <div class="admin-section">
+            <h3><i class="fa-solid fa-bars"></i> Menú Lateral Derecho (Ordenar, Agregar o Quitar)</h3>
+            <div class="admin-grid">
+                <div class="form-group">
+                    <label>Nombre en el menú:</label>
+                    <input type="text" id="menu-texto" placeholder="Ej: Promociones">
+                </div>
+                <div class="form-group">
+                    <label>Enlace / Sección:</label>
+                    <input type="text" id="menu-url" placeholder="Ej: tortas.html o index.html#galeria">
+                </div>
+                <div class="form-group">
+                    <label>Icono:</label>
+                    <select id="menu-icono">
+                        <option value="fa-solid fa-cake-candles">Torta / Pastel</option>
+                        <option value="fa-solid fa-bread-slice">Muffin / Pan</option>
+                        <option value="fa-solid fa-cookie-bite">Galleta / Cookie</option>
+                        <option value="fa-solid fa-images">Galería / Fotos</option>
+                        <option value="fa-solid fa-video">Video / Procesos</option>
+                        <option value="fa-solid fa-circle-question">Pregunta / FAQ</option>
+                        <option value="fa-solid fa-heart">Corazón / Destacado</option>
+                        <option value="fa-solid fa-house">Inicio</option>
+                    </select>
+                </div>
+            </div>
+            <button type="button" onclick="agregarItemMenu()" class="btn-primary">Agregar al Menú</button>
+            <div class="tag-list" id="lista-menu-admin"></div>
+        </div>
+
+        <div class="admin-section">
+            <h3><i class="fa-solid fa-list-check"></i> Opciones de los Desplegables (Pesos, Sabores y Cantidades)</h3>
+            <div class="admin-grid">
+                <div>
+                    <label><strong>Pesos / Tamaños / Porciones (Tortas):</strong></label>
+                    <div style="display:flex; gap:5px; margin-top:5px;">
+                        <input type="text" id="in-peso" placeholder="Ej: 2 Kg - 20 porciones">
+                        <button type="button" onclick="addOpcion('pesosTortas', 'in-peso')" class="btn-primary">+</button>
+                    </div>
+                    <div class="tag-list" id="tags-pesosTortas"></div>
+                </div>
+                <div>
+                    <label><strong>Sabores de Bizcochuelo:</strong></label>
+                    <div style="display:flex; gap:5px; margin-top:5px;">
+                        <input type="text" id="in-bizc" placeholder="Ej: Chocolate">
+                        <button type="button" onclick="addOpcion('bizcochuelos', 'in-bizc')" class="btn-primary">+</button>
+                    </div>
+                    <div class="tag-list" id="tags-bizcochuelos"></div>
+                </div>
+                <div>
+                    <label><strong>Rellenos de Tortas:</strong></label>
+                    <div style="display:flex; gap:5px; margin-top:5px;">
+                        <input type="text" id="in-rell" placeholder="Ej: Dulce de leche">
+                        <button type="button" onclick="addOpcion('rellenos', 'in-rell')" class="btn-primary">+</button>
+                    </div>
+                    <div class="tag-list" id="tags-rellenos"></div>
+                </div>
+                <div>
+                    <label><strong>Cantidades Cerradas (Muffins/Cookies):</strong></label>
+                    <div style="display:flex; gap:5px; margin-top:5px;">
+                        <input type="text" id="in-cant" placeholder="Ej: Caja x 12 unidades">
+                        <button type="button" onclick="addOpcion('cantidadesPack', 'in-cant')" class="btn-primary">+</button>
+                    </div>
+                    <div class="tag-list" id="tags-cantidadesPack"></div>
+                </div>
+                <div>
+                    <label><strong>Sabores (Muffins/Cookies):</strong></label>
+                    <div style="display:flex; gap:5px; margin-top:5px;">
+                        <input type="text" id="in-sabpack" placeholder="Ej: Surtidos">
+                        <button type="button" onclick="addOpcion('saboresPack', 'in-sabpack')" class="btn-primary">+</button>
+                    </div>
+                    <div class="tag-list" id="tags-saboresPack"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-section">
+            <h3><i class="fa-solid fa-cake-candles"></i> Publicar Producto al Catálogo</h3>
+            <form id="form-producto">
+                <div class="admin-grid">
+                    <div class="form-group">
+                        <label>Categoría:</label>
+                        <select id="prod-cat" required>
+                            <option value="torta">Torta</option>
+                            <option value="muffin">Muffin</option>
+                            <option value="cookie">Cookie / Galleta</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre del Producto:</label>
+                        <input type="text" id="prod-nombre" placeholder="Ej: Torta Floral" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Precio de Referencia:</label>
+                        <input type="text" id="prod-precio" placeholder="Ej: Desde $1500" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Foto del Producto:</label>
+                        <input type="file" id="prod-img" accept="image/*" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Descripción:</label>
+                    <textarea id="prod-desc" rows="2" required></textarea>
+                </div>
+                <button type="submit" class="btn-primary">Publicar Producto</button>
+                <button type="button" onclick="vaciarCatalogo()" class="btn-primary" style="background:#d9534f; margin-left:10px;">Vaciar Catálogo</button>
+            </form>
+            <div style="overflow-x:auto; margin-top:20px;" id="tabla-productos"></div>
+        </div>
+
+        <div class="admin-section">
+            <h3><i class="fa-solid fa-images"></i> Galería de Trabajos Realizados</h3>
+            <form id="form-galeria">
+                <div class="admin-grid">
+                    <div class="form-group"><label>Título del trabajo:</label><input type="text" id="gal-titulo" required></div>
+                    <div class="form-group"><label>Descripción breve:</label><input type="text" id="gal-desc" required></div>
+                    <div class="form-group"><label>Foto:</label><input type="file" id="gal-img" accept="image/*" required></div>
+                </div>
+                <button type="submit" class="btn-primary">Subir a Galería</button>
+            </form>
+            <div style="overflow-x:auto; margin-top:15px;" id="tabla-galeria"></div>
+        </div>
+
+        <div class="admin-section">
+            <h3><i class="fa-solid fa-video"></i> Blog de Procesos (Subir Fotos o Videos Cortos)</h3>
+            <form id="form-blog">
+                <div class="admin-grid">
+                    <div class="form-group"><label>Título de la publicación:</label><input type="text" id="blog-titulo" placeholder="Ej: Decorando torta temática" required></div>
+                    <div class="form-group">
+                        <label>Tipo de archivo:</label>
+                        <select id="blog-tipo">
+                            <option value="imagen">Imagen / Foto</option>
+                            <option value="video">Video Corto (MP4)</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Archivo (Foto o Video corto):</label><input type="file" id="blog-media" accept="image/*,video/mp4,video/webm" required></div>
+                </div>
+                <div class="form-group"><label>Descripción del proceso:</label><textarea id="blog-texto" rows="2" required></textarea></div>
+                <button type="submit" class="btn-primary">Publicar en el Blog</button>
+            </form>
+            <div style="overflow-x:auto; margin-top:15px;" id="tabla-blog"></div>
+        </div>
+
+        <div class="admin-section">
+            <h3><i class="fa-solid fa-circle-question"></i> Preguntas Frecuentes (FAQ) y Testimonios</h3>
+            <div class="admin-grid">
+                <div>
+                    <h4>Agregar Pregunta Frecuente</h4>
+                    <div class="form-group" style="margin-top:8px;"><input type="text" id="faq-preg" placeholder="Pregunta..."></div>
+                    <div class="form-group"><textarea id="faq-resp" rows="2" placeholder="Respuesta..."></textarea></div>
+                    <button type="button" onclick="agregarFaq()" class="btn-primary">Agregar FAQ</button>
+                    <div id="lista-faq-admin" style="margin-top:10px;"></div>
+                </div>
+                <div>
+                    <h4>Agregar Testimonio de Cliente</h4>
+                    <div class="form-group" style="margin-top:8px;"><input type="text" id="test-cliente" placeholder="Nombre del cliente"></div>
+                    <div class="form-group"><textarea id="test-texto" rows="2" placeholder="Comentario del cliente..."></textarea></div>
+                    <button type="button" onclick="agregarTestimonio()" class="btn-primary">Agregar Testimonio</button>
+                    <div id="lista-test-admin" style="margin-top:10px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-section">
+            <h3><i class="fa-solid fa-key"></i> Cambiar Contraseña de Administrador</h3>
+            <div style="display:flex; gap:10px; max-width:400px;">
+                <input type="password" id="nueva-clave" placeholder="Nueva contraseña" style="padding:10px; border:1px solid #ccc; border-radius:6px; flex:1;">
+                <button type="button" onclick="cambiarClave()" class="btn-primary">Actualizar</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        if (!localStorage.getItem('lulipop_admin_pass')) {
+            localStorage.setItem('lulipop_admin_pass', 'lulipop2026');
+        }
+        document.getElementById('form-login').addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (document.getElementById('admin-pass-input').value === localStorage.getItem('lulipop_admin_pass')) {
+                document.getElementById('auth-overlay').style.display = 'none';
+            } else {
+                alert("Contraseña incorrecta");
+            }
+        });
+        function cambiarClave() {
+            const c = document.getElementById('nueva-clave').value.trim();
+            if (c) { localStorage.setItem('lulipop_admin_pass', c); alert("Contraseña actualizada"); document.getElementById('nueva-clave').value = ''; }
+        }
+
+        function comprimirImagen(file, cb) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const maxW = 600;
+                    const scale = maxW / img.width;
+                    canvas.width = img.width > maxW ? maxW : img.width;
+                    canvas.height = img.width > maxW ? img.height * scale : img.height;
+                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                    cb(canvas.toDataURL('image/jpeg', 0.7));
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function renderReservas() {
+            let reservas = JSON.parse(localStorage.getItem('lulipop_reservas')) || [];
+            const cont = document.getElementById('tabla-reservas');
+            if (reservas.length === 0) { cont.innerHTML = "<p style='color:#666;'>No hay solicitudes de reserva pendientes.</p>"; return; }
+            let html = `<table><thead><tr><th>Fecha Evento</th><th>Cliente</th><th>Pedido</th><th>Alergias</th><th>Ref.</th><th>Acciones</th></tr></thead><tbody>`;
+            reservas.forEach((r, i) => {
+                let imgHtml = r.fotoRef ? `<a href="${r.fotoRef}" target="_blank"><img src="${r.fotoRef}" class="thumb"></a>` : 'Sin foto';
+                html += `<tr>
+                    <td><strong>${r.fechaEvento}</strong><br><small>Pedido el ${r.fechaSolicitud}</small></td>
+                    <td>${r.nombre}<br><a href="https://wa.me/598${r.telefono.replace(/\D/g,'')}" target="_blank" style="color:#25d366; font-weight:bold;"><i class="fa-brands fa-whatsapp"></i> ${r.telefono}</a></td>
+                    <td><strong>${r.categoria}: ${r.producto}</strong><br>${r.detallesExtra}<br><small><em>${r.entrega}</em></small></td>
+                    <td>${r.alergias}</td>
+                    <td>${imgHtml}</td>
+                    <td><button onclick="eliminarItem('lulipop_reservas', ${i}, renderReservas)" style="background:#d9534f; color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;">Borrar</button></td>
+                </tr>`;
+            });
+            html += `</tbody></table>`;
+            cont.innerHTML = html;
+        }
+
+        let config = JSON.parse(localStorage.getItem('lulipop_config')) || {
+            diasAnticipacion: 4,
+            tarifasEnvio: "Envíos dentro de la ciudad desde $150 (el costo exacto se confirma por WhatsApp según dirección).",
+            aboutTitle: "Sobre Lulipop",
+            aboutText: "¡Hola! Bienvenidos a Lulipop. Detrás de cada torta, muffin y cookie hay dedicación, ingredientes seleccionados y mucho amor por los detalles.",
+            aboutImg: "Lulipop logo.PNG",
+            logoImg: "Lulipop logo.PNG"
+        };
+        document.getElementById('cfg-dias').value = config.diasAnticipacion;
+        document.getElementById('cfg-envio').value = config.tarifasEnvio;
+        document.getElementById('cfg-about-title').value = config.aboutTitle;
+        document.getElementById('cfg-about-text').value = config.aboutText;
+
+        function guardarConfigGeneral() {
+            config.diasAnticipacion = document.getElementById('cfg-dias').value;
+            config.tarifasEnvio = document.getElementById('cfg-envio').value;
+            config.aboutTitle = document.getElementById('cfg-about-title').value;
+            config.aboutText = document.getElementById('cfg-about-text').value;
+            const file = document.getElementById('cfg-about-img').files[0];
+            if (file) {
+                comprimirImagen(file, data => {
+                    config.aboutImg = data;
+                    localStorage.setItem('lulipop_config', JSON.stringify(config));
+                    alert("¡Configuración guardada!");
+                });
+            } else {
+                localStorage.setItem('lulipop_config', JSON.stringify(config));
+                alert("¡Configuración guardada!");
+            }
+        }
+
+        // MENÚ LATERAL CON ORDEN (SUBIR / BAJAR)
+        function renderMenuAdmin() {
+            let menu = JSON.parse(localStorage.getItem('lulipop_menu')) || [];
+            const cont = document.getElementById('lista-menu-admin');
+            cont.innerHTML = '';
+            menu.forEach((m, i) => {
+                cont.innerHTML += `
+                    <div class="tag-item">
+                        <div><i class="${m.icono}"></i> <strong>${m.texto}</strong> <small>(${m.url})</small></div>
+                        <div>
+                            <button class="btn-order" onclick="moverMenu(${i}, -1)" title="Subir">&#9650;</button>
+                            <button class="btn-order" onclick="moverMenu(${i}, 1)" title="Bajar">&#9660;</button>
+                            <button class="btn-del" onclick="eliminarItem('lulipop_menu', ${i}, renderMenuAdmin)" title="Eliminar">&times;</button>
+                        </div>
+                    </div>`;
+            });
+        }
+        function agregarItemMenu() {
+            const texto = document.getElementById('menu-texto').value.trim();
+            const url = document.getElementById('menu-url').value.trim();
+            const icono = document.getElementById('menu-icono').value;
+            if (!texto || !url) return alert("Completa nombre y enlace");
+            let menu = JSON.parse(localStorage.getItem('lulipop_menu')) || [];
+            menu.push({ texto, url, icono });
+            localStorage.setItem('lulipop_menu', JSON.stringify(menu));
+            document.getElementById('menu-texto').value = '';
+            document.getElementById('menu-url').value = '';
+            renderMenuAdmin();
+        }
+        function moverMenu(index, direccion) {
+            let menu = JSON.parse(localStorage.getItem('lulipop_menu')) || [];
+            const nuevoIndex = index + direccion;
+            if (nuevoIndex < 0 || nuevoIndex >= menu.length) return;
+            const temp = menu[index];
+            menu[index] = menu[nuevoIndex];
+            menu[nuevoIndex] = temp;
+            localStorage.setItem('lulipop_menu', JSON.stringify(menu));
+            renderMenuAdmin();
+        }
+
+        let opciones = JSON.parse(localStorage.getItem('lulipop_opciones')) || {
+            pesosTortas: ["1.5 Kg - Chica (12 a 15 porciones)", "2.5 Kg - Mediana (20 a 25 porciones)"],
+            bizcochuelos: ["Vainilla", "Chocolate", "Marmolado"],
+            rellenos: ["Dulce de leche", "Crema Bariloche", "Ganache de Chocolate"],
+            cantidadesPack: ["Caja x 6 unidades", "Caja x 12 unidades"],
+            saboresPack: ["Vainilla", "Chocolate", "Surtidos"]
+        };
+        function renderOpciones() {
+            ['pesosTortas', 'bizcochuelos', 'rellenos', 'cantidadesPack', 'saboresPack'].forEach(key => {
+                const cont = document.getElementById(`tags-${key}`);
+                cont.innerHTML = '';
+                opciones[key].forEach((val, idx) => {
+                    cont.innerHTML += `<div class="tag-item"><span>${val}</span> <button class="btn-del" onclick="delOpcion('${key}', ${idx})">&times;</button></div>`;
+                });
+            });
+        }
+        function addOpcion(key, inputId) {
+            const val = document.getElementById(inputId).value.trim();
+            if (!val) return;
+            opciones[key].push(val);
+            localStorage.setItem('lulipop_opciones', JSON.stringify(opciones));
+            document.getElementById(inputId).value = '';
+            renderOpciones();
+        }
+        function delOpcion(key, idx) {
+            opciones[key].splice(idx, 1);
+            localStorage.setItem('lulipop_opciones', JSON.stringify(opciones));
+            renderOpciones();
+        }
+
+        document.getElementById('form-producto').addEventListener('submit', e => {
+            e.preventDefault();
+            const file = document.getElementById('prod-img').files[0];
+            comprimirImagen(file, imgData => {
+                let prods = JSON.parse(localStorage.getItem('lulipop_catalogo')) || [];
+                prods.push({
+                    categoria: document.getElementById('prod-cat').value,
+                    nombre: document.getElementById('prod-nombre').value,
+                    precio: document.getElementById('prod-precio').value,
+                    desc: document.getElementById('prod-desc').value,
+                    imagen: imgData
+                });
+                localStorage.setItem('lulipop_catalogo', JSON.stringify(prods));
+                e.target.reset();
+                renderProductos();
+            });
+        });
+        function renderProductos() {
+            let prods = JSON.parse(localStorage.getItem('lulipop_catalogo')) || [];
+            const cont = document.getElementById('tabla-productos');
+            if (prods.length === 0) { cont.innerHTML = "<p style='color:#666;'>No hay productos cargados.</p>"; return; }
+            let html = `<table><thead><tr><th>Foto</th><th>Categoría</th><th>Nombre</th><th>Precio</th><th>Acción</th></tr></thead><tbody>`;
+            prods.forEach((p, i) => {
+                html += `<tr><td><img src="${p.imagen}" class="thumb"></td><td>${p.categoria.toUpperCase()}</td><td>${p.nombre}</td><td>${p.precio}</td><td><button onclick="eliminarItem('lulipop_catalogo', ${i}, renderProductos)" style="background:#d9534f; color:white; border:none; padding:5px 8px; border-radius:4px;">Eliminar</button></td></tr>`;
+            });
+            cont.innerHTML = html + `</tbody></table>`;
+        }
+        function vaciarCatalogo() {
+            if (confirm("¿Vaciar todo el catálogo?")) { localStorage.setItem('lulipop_catalogo', JSON.stringify([])); renderProductos(); }
+        }
+
+        document.getElementById('form-galeria').addEventListener('submit', e => {
+            e.preventDefault();
+            comprimirImagen(document.getElementById('gal-img').files[0], imgData => {
+                let gal = JSON.parse(localStorage.getItem('lulipop_galeria')) || [];
+                gal.unshift({ titulo: document.getElementById('gal-titulo').value, desc: document.getElementById('gal-desc').value, imagen: imgData });
+                localStorage.setItem('lulipop_galeria', JSON.stringify(gal));
+                e.target.reset();
+                renderGaleria();
+            });
+        });
+        function renderGaleria() {
+            let gal = JSON.parse(localStorage.getItem('lulipop_galeria')) || [];
+            const cont = document.getElementById('tabla-galeria');
+            if (gal.length === 0) { cont.innerHTML = ""; return; }
+            let html = `<table><thead><tr><th>Foto</th><th>Título</th><th>Acción</th></tr></thead><tbody>`;
+            gal.forEach((g, i) => {
+                html += `<tr><td><img src="${g.imagen}" class="thumb"></td><td>${g.titulo}</td><td><button onclick="eliminarItem('lulipop_galeria', ${i}, renderGaleria)" style="background:#d9534f; color:white; border:none; padding:5px 8px; border-radius:4px;">Borrar</button></td></tr>`;
+            });
+            cont.innerHTML = html + `</tbody></table>`;
+        }
+
+        document.getElementById('form-blog').addEventListener('submit', e => {
+            e.preventDefault();
+            const tipo = document.getElementById('blog-tipo').value;
+            const file = document.getElementById('blog-media').files[0];
+            if (tipo === 'video' && file.size > 4 * 1024 * 1024) {
+                return alert("Por favor sube un video corto ligero (menor a 4MB) para que cargue rápido en la web.");
+            }
+            const reader = new FileReader();
+            reader.onload = ev => {
+                let posts = JSON.parse(localStorage.getItem('lulipop_blog')) || [];
+                posts.unshift({
+                    titulo: document.getElementById('blog-titulo').value,
+                    tipo,
+                    media: ev.target.result,
+                    texto: document.getElementById('blog-texto').value,
+                    fecha: new Date().toLocaleDateString()
+                });
+                localStorage.setItem('lulipop_blog', JSON.stringify(posts));
+                e.target.reset();
+                renderBlog();
+            };
+            reader.readAsDataURL(file);
+        });
+        function renderBlog() {
+            let posts = JSON.parse(localStorage.getItem('lulipop_blog')) || [];
+            const cont = document.getElementById('tabla-blog');
+            if (posts.length === 0) { cont.innerHTML = ""; return; }
+            let html = `<table><thead><tr><th>Tipo</th><th>Título</th><th>Fecha</th><th>Acción</th></tr></thead><tbody>`;
+            posts.forEach((p, i) => {
+                html += `<tr><td>${p.tipo.toUpperCase()}</td><td>${p.titulo}</td><td>${p.fecha}</td><td><button onclick="eliminarItem('lulipop_blog', ${i}, renderBlog)" style="background:#d9534f; color:white; border:none; padding:5px 8px; border-radius:4px;">Borrar</button></td></tr>`;
+            });
+            cont.innerHTML = html + `</tbody></table>`;
+        }
+
+        function agregarFaq() {
+            const p = document.getElementById('faq-preg').value.trim();
+            const r = document.getElementById('faq-resp').value.trim();
+            if (!p || !r) return;
+            let faqs = JSON.parse(localStorage.getItem('lulipop_faq')) || [];
+            faqs.push({ pregunta: p, respuesta: r });
+            localStorage.setItem('lulipop_faq', JSON.stringify(faqs));
+            document.getElementById('faq-preg').value = '';
+            document.getElementById('faq-resp').value = '';
+            renderFaqAdmin();
+        }
+        function renderFaqAdmin() {
+            let faqs = JSON.parse(localStorage.getItem('lulipop_faq')) || [];
+            const cont = document.getElementById('lista-faq-admin');
+            cont.innerHTML = '';
+            faqs.forEach((f, i) => {
+                cont.innerHTML += `<div class="tag-item"><span>${f.pregunta}</span> <button class="btn-del" onclick="eliminarItem('lulipop_faq', ${i}, renderFaqAdmin)">&times;</button></div>`;
+            });
+        }
+
+        function agregarTestimonio() {
+            const c = document.getElementById('test-cliente').value.trim();
+            const t = document.getElementById('test-texto').value.trim();
+            if (!c || !t) return;
+            let tests = JSON.parse(localStorage.getItem('lulipop_testimonios')) || [];
+            tests.push({ cliente: c, texto: t });
+            localStorage.setItem('lulipop_testimonios', JSON.stringify(tests));
+            document.getElementById('test-cliente').value = '';
+            document.getElementById('test-texto').value = '';
+            renderTestAdmin();
+        }
+        function renderTestAdmin() {
+            let tests = JSON.parse(localStorage.getItem('lulipop_testimonios')) || [];
+            const cont = document.getElementById('lista-test-admin');
+            cont.innerHTML = '';
+            tests.forEach((t, i) => {
+                cont.innerHTML += `<div class="tag-item"><span><strong>${t.cliente}:</strong> ${t.texto}</span> <button class="btn-del" onclick="eliminarItem('lulipop_testimonios', ${i}, renderTestAdmin)">&times;</button></div>`;
+            });
+        }
+
+        function eliminarItem(storageKey, index, callback) {
+            let arr = JSON.parse(localStorage.getItem(storageKey)) || [];
+            arr.splice(index, 1);
+            localStorage.setItem(storageKey, JSON.stringify(arr));
+            callback();
+        }
+
+        renderReservas();
+        renderMenuAdmin();
+        renderOpciones();
+        renderProductos();
+        renderGaleria();
+        renderBlog();
+        renderFaqAdmin();
+        renderTestAdmin();
+    </script>
+</body>
+</html>
